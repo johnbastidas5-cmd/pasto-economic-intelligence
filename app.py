@@ -20,67 +20,60 @@ st.set_page_config(
 )
 
 # --------------------------
-# DISEÑO UI/UX - DARK MODE PROFESIONAL
+# DISEÑO UI/UX - DARK MODE PROFESIONAL CORREGIDO
 # --------------------------
-# Soluciona el problema de contraste en tarjetas, métricas y textos
 st.markdown("""
 <style>
-    /* Fondo principal y textos base */
-    .stApp {
-        background-color: #0B1120;
-        color: #F8FAFC;
-    }
-    h1, h2, h3, h4, h5, h6 {
-        color: #F8FAFC !important;
-        font-weight: 600;
-        letter-spacing: -0.02em;
-    }
-    /* Barra lateral */
-    div[data-testid="stSidebar"] {
-        background-color: #111827;
-        border-right: 1px solid #1E293B;
-    }
-    div[data-testid="stSidebar"] * {
-        color: #CBD5E1 !important;
-    }
-    div[data-testid="stSidebar"] h1 {
+    /* Fondo principal y app */
+    .stApp, div[data-testid="stAppViewContainer"] {
+        background-color: #0B1120 !important;
         color: #F8FAFC !important;
     }
+    
+    /* BARRA LATERAL (SIDEBAR) - Fondo oscuro unificado */
+    section[data-testid="stSidebar"], div[data-testid="stSidebar"] {
+        background-color: #111827 !important;
+        border-right: 1px solid #1E293B !important;
+    }
+    
+    /* Textos, radio buttons y títulos en Sidebar */
+    section[data-testid="stSidebar"] * {
+        color: #E2E8F0 !important;
+    }
+    section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] h2 {
+        color: #F8FAFC !important;
+    }
+    
     /* Tarjetas de métricas (st.metric) */
     div[data-testid="metric-container"] {
-        background-color: #1E293B;
+        background-color: #1E293B !important;
         padding: 1rem 1.5rem;
         border-radius: 0.75rem;
         border: 1px solid #334155;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
-    /* CORRECCIÓN DE CONTRASTE: Títulos y valores de las métricas */
-    div[data-testid="stMetricLabel"] label, div[data-testid="stMetricLabel"] p {
+    div[data-testid="stMetricLabel"] p {
         color: #94A3B8 !important;
-        font-size: 0.9rem !important;
         font-weight: 500;
     }
     div[data-testid="stMetricValue"] div {
         color: #F8FAFC !important;
         font-weight: 700;
     }
-    /* Alertas y banners */
+
+    /* Banners y Cuadros de alerta (st.warning / st.info / st.success) */
     div.stAlert {
+        background-color: #1E293B !important;
+        border: 1px solid #334155 !important;
         border-radius: 0.5rem;
-        border: 1px solid #334155;
     }
-    /* Párrafos, listas y captions */
-    p, li, .stCaption {
-        color: #CBD5E1 !important;
+    div.stAlert p, div.stAlert div, div.stAlert label {
+        color: #F1F5F9 !important;
     }
-    /* Líneas separadoras */
-    hr {
-        border-color: #1E293B !important;
-    }
-    /* Selectores y radio buttons */
-    .stRadio > div > label > div {
-        color: #F8FAFC !important;
-    }
+    
+    /* Textos y títulos generales */
+    h1, h2, h3, h4 { color: #F8FAFC !important; }
+    p, li, span { color: #CBD5E1 !important; }
+    hr { border-color: #1E293B !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -101,11 +94,13 @@ PLOTLY_LAYOUT = dict(
 # --------------------------
 # CARGA DE DATOS
 # --------------------------
+BASE_DIR = Path(__file__).resolve().parent
+RUTA_DATA = BASE_DIR / "data"
+
 @st.cache_data
 def cargar_datos():
-    ruta_data = Path("data")
-    archivo1 = ruta_data / "serie_completa_pasto.csv"
-    archivo2 = ruta_data / "resumen_anual_pasto.csv"
+    archivo1 = RUTA_DATA / "serie_completa_pasto.csv"
+    archivo2 = RUTA_DATA / "resumen_anual_pasto.csv"
 
     if archivo1.exists() and archivo2.exists():
         pasto = pd.read_csv(archivo1, parse_dates=["date"])
@@ -114,14 +109,12 @@ def cargar_datos():
         anual = anual[anual["year"] <= 2025].copy()
         return pasto, anual
 
-    st.error("⚠️ No se encontraron los archivos CSV en la carpeta 'data'. Verifique que los archivos estén disponibles.")
+    st.error("⚠️ No se encontraron los archivos CSV principales en la carpeta 'data'.")
     st.stop()
 
-# Intento de cargar datos de múltiples ciudades (para mapa de calor)
 @st.cache_data
 def cargar_datos_ciudades():
-    ruta_data = Path("data")
-    archivo_ciudades = ruta_data / "ipc_ciudades_colombia.csv"
+    archivo_ciudades = RUTA_DATA / "ipc_ciudades_colombia.csv"
     if archivo_ciudades.exists():
         ciudades = pd.read_csv(archivo_ciudades, parse_dates=["date"])
         return ciudades
@@ -166,7 +159,6 @@ if pagina == "Inicio":
     st.markdown("Herramienta de visualización preliminar asociada al Seminario de Investigación Regional 2 – Universidad de Nariño.")
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Tarjetas de métricas principales
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Observaciones Mensuales", f"{len(pasto):,}")
@@ -198,7 +190,6 @@ elif pagina == "Evolución de la inflación":
     """)
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Gráfica 1: Mensual
     fig1 = px.line(
         pasto, x="date", y="var_mensual",
         title="Variación mensual del IPC (2017-2025)",
@@ -211,7 +202,6 @@ elif pagina == "Evolución de la inflación":
 
     st.markdown("---")
     
-    # Gráfica 2: Anual Compuesta
     st.markdown("### Inflación anual aproximada (Compounding)")
     st.caption("Calculada mediante composición (compounding) de las variaciones mensuales oficiales del DANE. Se incluyen solo años con cobertura casi completa (≥11 meses).")
 
@@ -225,7 +215,6 @@ elif pagina == "Evolución de la inflación":
     )
     fig2.update_traces(marker_color="#60A5FA", textposition="outside", textfont=dict(color="#F8FAFC"))
     fig2.update_layout(**PLOTLY_LAYOUT, height=400)
-    # Asegurar que el eje X muestre los años como enteros
     fig2.update_xaxes(dtick=1) 
     st.plotly_chart(fig2, use_container_width=True)
 
@@ -256,54 +245,111 @@ elif pagina == "Poder adquisitivo (proxy)":
     """)
 
 elif pagina == "Comparación territorial":
-    st.title("Comparación Territorial de la Inflación")
-    st.markdown("Análisis comparado de la variación de precios entre San Juan de Pasto y otras ciudades capitales de Colombia.")
+    st.title("Mapa Geográfico de Inflación Regional en Colombia")
+    st.markdown("Variación mensual del IPC en las principales capitales de Colombia sobre el mapa territorial.")
     
     if datos_ciudades is not None:
-        # LÓGICA SI EL USUARIO PROPORCIONA EL ARCHIVO DE CIUDADES
-        st.success("Base de datos territorial cargada correctamente.")
+        COORDENADAS_CAPITALES = {
+            "Bogotá": {"lat": 4.7110, "lon": -74.0721},
+            "Medellín": {"lat": 6.2442, "lon": -75.5812},
+            "Cali": {"lat": 3.4516, "lon": -76.5320},
+            "Barranquilla": {"lat": 10.9685, "lon": -74.7813},
+            "Cartagena": {"lat": 10.3997, "lon": -75.5144},
+            "Bucaramanga": {"lat": 7.1254, "lon": -73.1198},
+            "Pasto": {"lat": 1.2136, "lon": -77.2811},
+            "Manizales": {"lat": 5.0689, "lon": -75.5174},
+            "Pereira": {"lat": 4.8133, "lon": -75.6961},
+            "Armenia": {"lat": 4.5339, "lon": -75.6811},
+            "Cúcuta": {"lat": 7.8939, "lon": -72.5078},
+            "Ibagué": {"lat": 4.4389, "lon": -75.2322},
+            "Ibague": {"lat": 4.4389, "lon": -75.2322},
+            "Neiva": {"lat": 2.9273, "lon": -75.2819},
+            "Popayán": {"lat": 2.4448, "lon": -76.6147},
+            "Montería": {"lat": 8.7479, "lon": -75.8814},
+            "Sincelejo": {"lat": 9.3047, "lon": -75.3978},
+            "Valledupar": {"lat": 10.4631, "lon": -73.2532},
+            "Riohacha": {"lat": 11.5444, "lon": -72.9072},
+            "Santa Marta": {"lat": 11.2408, "lon": -74.1990},
+            "Villavicencio": {"lat": 4.1420, "lon": -73.6266},
+            "Tunja": {"lat": 5.5353, "lon": -73.3678},
+            "Florencia": {"lat": 1.6144, "lon": -75.6062},
+            "Quibdó": {"lat": 5.6947, "lon": -76.6611},
+            "Quibdo": {"lat": 5.6947, "lon": -76.6611},
+            "San Andrés": {"lat": 12.5847, "lon": -81.7006}
+        }
         
-        # Crear tabla pivote para el mapa de calor (Ciudad vs Fecha)
-        pivot_ciudades = datos_ciudades.pivot_table(
-            values='var_mensual', 
-            index='ciudad', 
-            columns='date', 
-            aggfunc='mean'
+        df_geo = datos_ciudades.copy()
+        df_geo['date_str'] = pd.to_datetime(df_geo['date']).dt.strftime('%Y-%m')
+        fechas_disponibles = sorted(df_geo['date_str'].unique())
+        
+        col_sel1, col_sel2 = st.columns([2, 1])
+        with col_sel1:
+            fecha_seleccionada = st.select_slider(
+                "📅 Seleccione el periodo a visualizar:",
+                options=fechas_disponibles,
+                value=fechas_disponibles[-1]
+            )
+        
+        df_mes = df_geo[df_geo['date_str'] == fecha_seleccionada].copy()
+        
+        df_mes['lat'] = df_mes['ciudad'].map(lambda x: COORDENADAS_CAPITALES.get(x, {}).get('lat', None))
+        df_mes['lon'] = df_mes['ciudad'].map(lambda x: COORDENADAS_CAPITALES.get(x, {}).get('lon', None))
+        
+        df_mapa = df_mes.dropna(subset=['lat', 'lon']).copy()
+        
+        with col_sel2:
+            var_pasto = df_mes[df_mes['ciudad'] == 'Pasto']['var_mensual'].values
+            val_pasto_txt = f"{var_pasto[0]:.2f}%" if len(var_pasto) > 0 else "N/D"
+            st.metric(f"Inflación Pasto ({fecha_seleccionada})", val_pasto_txt)
+
+        fig_mapa = px.scatter_geo(
+            df_mapa,
+            lat='lat',
+            lon='lon',
+            color='var_mensual',
+            size=abs(df_mapa['var_mensual']) + 0.5,
+            hover_name='ciudad',
+            hover_data={'var_mensual': ':.2f%', 'lat': False, 'lon': False},
+            text='ciudad',
+            color_continuous_scale="Reds",
+            title=f"Mapa de Inflación Mensual IPC — Colombia ({fecha_seleccionada})",
+            labels={'var_mensual': 'Var. Mensual (%)'}
         )
         
-        fig = px.imshow(
-            pivot_ciudades,
-            color_continuous_scale="RdYlBu_r", # Rojo para alta inflación, Azul para baja/deflación
-            aspect="auto",
-            title="Mapa de Calor: Variación Mensual del IPC por Ciudades",
-            labels=dict(x="Fecha", y="Dominio Geográfico (Ciudad)", color="Var. Mensual (%)")
+        fig_mapa.update_geos(
+            scope="south america",
+            center=dict(lat=4.5, lon=-73.0),
+            projection_scale=4.2,
+            showcountries=True,
+            countrycolor="#475569",
+            showcoastlines=True,
+            coastlinecolor="#475569",
+            showland=True,
+            landcolor="#1E293B",
+            showocean=True,
+            oceancolor="#0B1120",
+            showlakes=True,
+            lakecolor="#0B1120"
         )
-        fig.update_layout(**PLOTLY_LAYOUT, height=600)
-        st.plotly_chart(fig, use_container_width=True)
         
-        st.caption("Los tonos más rojizos indican presiones inflacionarias más fuertes en ese mes específico para la ciudad correspondiente.")
+        fig_mapa.update_traces(
+            textposition='top center',
+            marker=dict(line=dict(width=1, color='#F8FAFC'))
+        )
+        
+        fig_mapa.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            height=600,
+            font=dict(color="#CBD5E1")
+        )
+        
+        st.plotly_chart(fig_mapa, use_container_width=True)
+        st.caption("📍 El mapa permite deslizar la barra de fechas para explorar la evolución espacial de la inflación en Colombia mes a mes.")
+    
     else:
-        # LÓGICA SI NO HAY DATOS TERRITORIALES (Cumpliendo la directriz de NO inventar datos)
-        st.warning("""
-        **Limitación de Datos: Comparación territorial no disponible.**
-        
-        Actualmente, la base de datos cargada (`serie_completa_pasto.csv`) únicamente contiene observaciones para el dominio geográfico de San Juan de Pasto. Para realizar un análisis comparado espacialmente válido frente a otros dominios, es necesario contar con información cruzada oficial.
-        
-        *No se han imputado ni estimado valores territoriales artificiales para preservar el rigor académico exigido.*
-        """, icon="🛑")
-        
-        st.markdown("### ¿Cómo activar este módulo?")
-        st.markdown("""
-        Para activar el Mapa de Calor territorial, incluya un archivo llamado `ipc_ciudades_colombia.csv` en la carpeta `data/` con la siguiente estructura proveniente de los anexos del DANE:
-        """)
-        
-        df_ejemplo = pd.DataFrame({
-            "date": ["2023-01-01", "2023-01-01", "2023-01-01"],
-            "ciudad": ["Pasto", "Bogotá", "Cali"],
-            "var_mensual": [1.12, 1.05, 1.15]
-        })
-        st.dataframe(df_ejemplo, use_container_width=True)
-        st.caption("Una vez el archivo esté en la carpeta, el sistema generará automáticamente el mapa de calor económico.")
+        st.warning("⚠️ No se encontró la base de datos `data/ipc_ciudades_colombia.csv`.")
 
 elif pagina == "Proyecciones exploratorias":
     st.title("Proyecciones Exploratorias")
