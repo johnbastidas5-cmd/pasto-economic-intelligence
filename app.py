@@ -44,7 +44,7 @@ st.markdown("""
         border-radius: 0.75rem;
         border: 1px solid #334155;
     }
-    div[data-testid="stMetricLabel"] p {
+    div[data-testid="metric-label"] p, div[data-testid="stMetricLabel"] p {
         color: #94A3B8 !important;
         font-weight: 500;
     }
@@ -53,13 +53,13 @@ st.markdown("""
         font-weight: 700;
     }
     
-    /* CORRECCIÓN DEFINITIVA DE ALERTAS (Fondo oscuro elegante y texto blanco legible) */
-    div.stAlert {
+    /* CORRECCIÓN FORZADA DE ALERTAS Y WARNINGS (Texto blanco brillante y legible) */
+    div.stAlert, div[data-baseweb="notification"] {
         background-color: #1E293B !important;
         border: 1px solid #38BDF8 !important;
         border-radius: 0.5rem;
     }
-    div.stAlert p, div.stAlert div, div.stAlert span, div.stAlert label {
+    div.stAlert *, div[data-baseweb="notification"] * {
         color: #F8FAFC !important;
     }
 
