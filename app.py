@@ -33,22 +33,28 @@ st.markdown("""
 # --------------------------
 # CARGA DE DATOS
 # --------------------------
+# --------------------------
+# CARGA DE DATOS
+# --------------------------
 @st.cache_data
 def cargar_datos():
-    base = Path("ENTREGABLES_PASTO/data")
-    try:
-        pasto = pd.read_csv(base / "serie_completa_pasto.csv", parse_dates=["date"])
-        anual = pd.read_csv(base / "resumen_anual_pasto.csv")
-        # Filtrar periodo principal 2017-2025
+    # Busca la carpeta data directamente en la raíz del repositorio
+    ruta_data = Path("data")
+    
+    archivo1 = ruta_data / "serie_completa_pasto.csv"
+    archivo2 = ruta_data / "resumen_anual_pasto.csv"
+    
+    if archivo1.exists() and archivo2.exists():
+        pasto = pd.read_csv(archivo1, parse_dates=["date"])
+        anual = pd.read_csv(archivo2)
         pasto = pasto[pasto["year"] <= 2025].copy()
         anual = anual[anual["year"] <= 2025].copy()
         return pasto, anual
-    except Exception as e:
-        st.error(f"No se encontraron los datos. Error: {e}")
-        st.stop()
+    
+    st.error("No se encontraron los archivos CSV en la carpeta 'data'. Asegúrate de que la carpeta 'data' esté subida en la raíz de tu GitHub.")
+    st.stop()
 
 pasto, anual = cargar_datos()
-
 # --------------------------
 # SIDEBAR
 # --------------------------
