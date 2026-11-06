@@ -20,7 +20,7 @@ st.set_page_config(
 )
 
 # --------------------------
-# DISEÑO UI/UX - DARK MODE PROFESIONAL
+# DISEÑO UI/UX - DARK MODE PROFESIONAL CORREGIDO
 # --------------------------
 st.markdown("""
 <style>
@@ -52,13 +52,15 @@ st.markdown("""
         color: #F8FAFC !important;
         font-weight: 700;
     }
+    /* CORRECCIÓN DE ALERTS PARA ALTO CONTRASTE EN MODO OSCURO */
     div.stAlert {
         background-color: #1E293B !important;
-        border: 1px solid #334155 !important;
+        border: 1px solid #38BDF8 !important;
         border-radius: 0.5rem;
+        color: #F8FAFC !important;
     }
-    div.stAlert p, div.stAlert div, div.stAlert label {
-        color: #F1F5F9 !important;
+    div.stAlert p, div.stAlert div, div.stAlert label, div.stAlert span {
+        color: #F8FAFC !important;
     }
     h1, h2, h3, h4 { color: #F8FAFC !important; }
     p, li, span { color: #CBD5E1 !important; }
@@ -90,7 +92,7 @@ def cargar_datos():
         pasto = pasto[pasto["year"] <= 2025].copy()
         anual = anual[anual["year"] <= 2025].copy()
         return pasto, anual
-    st.error("⚠️ No se encontraron los archivos principales en 'data'.")
+    st.error("⚠️ No se encontraron los archivos principales en la carpeta 'data'.")
     st.stop()
 
 @st.cache_data
@@ -162,7 +164,15 @@ elif pagina == "Evolución de la inflación":
 
 elif pagina == "Poder adquisitivo (proxy)":
     st.title("Poder adquisitivo del salario mínimo (Proxy)")
-    st.warning("Nota metodológica: Indicador agregado deflactado por el IPC de Pasto.", icon="⚠️")
+    
+    # Alerta con legibilidad corregida
+    st.warning("""
+    **Nota metodológica importante:**  
+    Este indicador utiliza el Salario Mínimo Mensual Legal Vigente (SMMLV) deflactado por el IPC de Pasto.  
+    Constituye un **proxy agregado** y no representa el ingreso real de los hogares. Para un análisis riguroso a nivel de hogar se requieren microdatos de la GEIH. Existe una relación mecánica porque el mismo IPC se emplea como deflactor.
+    """, icon="⚠️")
+
+    st.markdown("<br>", unsafe_allow_html=True)
     fig = px.line(pasto, x="date", y="poder_adquisitivo", title="Evolución del Poder Adquisitivo del SMMLV (Pesos base dic 2018)")
     fig.update_traces(line_color="#34D399", line_width=2.5, fill='tozeroy', fillcolor="rgba(52, 211, 153, 0.1)")
     fig.update_layout(**PLOTLY_LAYOUT, height=450)
@@ -170,24 +180,14 @@ elif pagina == "Poder adquisitivo (proxy)":
 
 elif pagina == "Comparación territorial estratégica":
     st.title("Heterogeneidad Regional y Asimetrías en el Costo de Vida")
-    st.markdown("Análisis comparativo focalizado entre centros urbanos principales (**Bogotá**, **Medellín**), economías intermedias fronterizas/andinas (**San Juan de Pasto**) y dominios con vulnerabilidad estructural (**Tumaco** y **Quibdó**).")
+    st.markdown("Análisis comparativo focalizado entre centros urbanos principales (**Bogotá**, **Medellín**) y economías regionales con alta vulnerabilidad estructural.")
     
     if datos_ciudades is not None:
-        # Filtrar ciudades de interés estratégico
-        ciudades_foco = ["Pasto", "Bogotá", "Medellín", "San Andrés de Tumaco", "Quibdo"]
-        
-        # Mapeo o limpieza si Tumaco se llama 'San Andrés de Tumaco' o similar en el DANE
         df_ciudades = datos_ciudades.copy()
-        
-        # Verificar qué nombres de ciudades exactos existen en el dataframe
         disponibles = df_ciudades['ciudad'].unique()
-        
-        # Seleccionar las disponibles que coincidan con nuestro enfoque
         ciudades_seleccionadas = [c for c in ["Pasto", "Bogotá", "Medellín", "Quibdo", "Florencia", "Popayán"] if c in disponibles]
-        
         df_filtrado = df_ciudades[df_ciudades['ciudad'].isin(ciudades_seleccionadas)].copy()
         
-        # Gráfico de líneas temporales comparadas
         fig_comp = px.line(
             df_filtrado,
             x='date',
@@ -204,16 +204,16 @@ elif pagina == "Comparación territorial estratégica":
         st.markdown("""
         ### Asimetrías Espaciales y Canastas de Consumo Diferenciadas
         
-        La evidencia gráfica permite validar que **la inflación no opera como un fenómeno espacialmente homogéneo**. Las economías regionales de Colombia enfrentan choques de oferta y estructuras de costos altamente fragmentados debido a factores logísticos, costos de transporte y la composición de la canasta de bienes de los hogares:
+        La evidencia gráfica permite validar que **la inflación no opera como un fenómeno espacialmente homogéneo**. Las economías regionales de Colombia enfrentan choques de oferta y estructuras de costos fragmentados:
         
         1. **Vulnerabilidad en Regiones Periféricas (Pasto y Quibdó):**  
-           San Juan de Pasto y Quibdó experimentan con frecuencia una alta volatilidad en los precios de los alimentos y bienes regulados. Al ser economías con alta dependencia de cadenas de suministro externas y con conectividad vial vulnerable (frecuentes cierres en la vía Panamericana para el caso de Pasto), los choques de oferta externos se transmiten de manera más violenta e inelástica hacia el consumidor local.
+           San Juan de Pasto y Quibdó experimentan alta volatilidad en los precios de alimentos y bienes regulados debido a su dependencia de cadenas de suministro externas y vulnerabilidad logística (como los cierres en la vía Panamericana).
            
-        2. **Efecto Escala en Centros Urbanos Mayores (Bogotá y Medellín):**  
-           Bogotá y Medellín exhiben trayectorias inflacionarias con menor amplitud mensual extrema, explicadas por mercados laborales más profundos, economías de aglomeración y redes logísticas diversificadas que amortiguan parcialmente los choques exógenos de materias primas internacionales.
+        2. **Efecto Escala en Centros Urbanos (Bogotá y Medellín):**  
+           Bogotá y Medellín exhiben trayectorias con menor amplitud extrema, amortiguadas por mercados laborales profundos y redes logísticas diversificadas.
            
-        3. **Implicaciones sobre la Distribución del Ingreso y el Poder Adquisitivo:**  
-           Dado que los hogares de menores ingresos en ciudades intermedias y periféricas destinan una proporción significativamente mayor de su presupuesto presupuestario a **bienes de primera necesidad (alimentos y servicios públicos)**, un aumento idéntico en la tasa de inflación general representa una **pérdida real de poder adquisitivo desproporcionadamente mayor** para Pasto y Quibdó en comparación con los estratos medios y altos de las grandes metrópolis. Esto corrobora empíricamente la hipótesis de que la inflación actúa como un impuesto regresivo territorial.
+        3. **Implicaciones sobre el Poder Adquisitivo:**  
+           Los hogares de menores ingresos en ciudades intermedias destinan una proporción mayor de su presupuesto a bienes esenciales, por lo que un choque inflacionario representa una **pérdida real de bienestar desproporcionadamente mayor**, confirmando que la inflación actúa como un impuesto regresivo territorial.
         """)
     else:
         st.warning("⚠️ No se encontró la base de datos `data/ipc_ciudades_colombia.csv`.")
@@ -234,15 +234,44 @@ elif pagina == "Proyecciones exploratorias":
 
 elif pagina == "Conceptos metodológicos":
     st.title("Conceptos y Notas Metodológicas")
-    st.write("Detalles conceptuales sobre el IPC regional y la formación de precios en dominios periféricos y centrales.")
+    st.markdown("Precisiones teóricas y operativas para la correcta lectura de la investigación.")
+
+    with st.expander("📌 Índice de Precios al Consumidor (IPC)", expanded=True):
+        st.write("Indicador estadístico que mide la variación porcentual promedio de los precios de una canasta representativa de bienes y servicios de consumo de los hogares. En Colombia es elaborado mensualmente por el DANE. La segmentación por dominio geográfico (Pasto) permite aislar las dinámicas locales.")
+
+    with st.expander("📌 Poder adquisitivo y salarios reales"):
+        st.write("Representa la cantidad de bienes y servicios que un flujo de ingresos nominales permite adquirir. Si la inflación crece por encima de los ajustes nominales salariales, el ingreso real disminuye y se deteriora el bienestar.")
+
+    with st.expander("📌 Limitación mecánica del Proxy"):
+        st.write("Al construir el indicador dividiendo el SMMLV entre el IPC regional, se introduce una covarianza puramente matemática. Esto restringe la interpretación causal directa a partir de este indicador agregado.")
+
+    with st.expander("📌 Alcance y limitaciones causales"):
+        st.write("La información presentada evidencia asociación estadística y evolución conjunta. La identificación de impactos causales heterogéneos sobre los hogares requerirá en fases avanzadas el uso de microdatos de la Gran Encuesta Integrada de Hogares (GEIH).")
 
 elif pagina == "Fuentes y limitaciones":
     st.title("Fuentes Documentales y Limitaciones")
-    st.markdown("DANE – Anexos de IPC por ciudades y dominios geográficos (2017-2025).")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("### 📚 Fuentes Oficiales")
+        st.markdown("""
+        * **Fuente Primaria:** Departamento Administrativo Nacional de Estadística (DANE).
+        * **Módulo:** Anexos de variación mensual del IPC por ciudades y dominios geográficos.
+        * **Proxy Salarial:** Salario Mínimo Mensual Legal Vigente (SMMLV) deflactado (Base Dic. 2018).
+        * **Periodo de Estudio:** 2017 – 2025.
+        """)
+    with col2:
+        st.markdown("### ⚠️ Limitaciones Metodológicas")
+        st.markdown("""
+        * El análisis empírico actual utiliza series agregadas; **no incorpora microdatos** de ingresos a nivel de hogar (GEIH).
+        * El alcance es de carácter descriptivo-correlacional, **no establece efectos causales** paramétricos directos.
+        * Las proyecciones presentadas son ejercicios inerciales exploratorios y no constituyen pronósticos oficiales.
+        """)
 
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #64748B; font-size: 0.85rem;'>
-    Seminario de Investigación Regional 2 | Universidad de Nariño | 2026
+    Seminario de Investigación Regional 2 | Universidad de Nariño | 2026<br>
+    Desarrollado para el análisis reproducible con Streamlit y Plotly.
 </div>
 """, unsafe_allow_html=True)
