@@ -218,19 +218,6 @@ elif pagina == "Comparación territorial estratégica":
     else:
         st.warning("⚠️ No se encontró la base de datos `data/ipc_ciudades_colombia.csv`.")
 
-elif pagina == "Proyecciones exploratorias":
-    st.title("Proyecciones Exploratorias")
-    ultimos_12 = pasto.tail(12)["var_mensual"].mean()
-    st.metric("Promedio Móvil (Últimos 12 meses)", f"{ultimos_12:.3f}%")
-    meses = st.slider("Horizonte (meses)", 3, 18, 6)
-    ultima_fecha = pasto["date"].max()
-    fechas_futuras = pd.date_range(start=ultima_fecha + pd.offsets.MonthBegin(1), periods=meses, freq="MS")
-    proyeccion = pd.DataFrame({"date": fechas_futuras, "var_mensual": ultimos_12})
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=pasto["date"], y=pasto["var_mensual"], name="Histórico", line=dict(color="#38BDF8", width=2)))
-    fig.add_trace(go.Scatter(x=proyeccion["date"], name="Proyección", y=proyeccion["var_mensual"], line=dict(color="#FBBF24", width=2.5, dash="dot")))
-    fig.update_layout(title="Proyección Inercial", **PLOTLY_LAYOUT, height=450)
-    st.plotly_chart(fig, use_container_width=True)
 
 elif pagina == "Conceptos metodológicos":
     st.title("Conceptos y Notas Metodológicas")
