@@ -245,8 +245,8 @@ elif pagina == "Poder adquisitivo (proxy)":
     """)
 
 elif pagina == "Comparación territorial":
-    st.title("Mapa Geográfico de Inflación Regional en Colombia")
-    st.markdown("Variación mensual del IPC en las principales capitales de Colombia sobre el mapa territorial.")
+    st.title("Comparación Territorial de la Inflación en Colombia")
+    st.markdown("Análisis espacial y comparado de la variación mensual del IPC entre San Juan de Pasto y las demás capitales del país.")
     
     if datos_ciudades is not None:
         COORDENADAS_CAPITALES = {
@@ -285,13 +285,12 @@ elif pagina == "Comparación territorial":
         col_sel1, col_sel2 = st.columns([2, 1])
         with col_sel1:
             fecha_seleccionada = st.select_slider(
-                "📅 Seleccione el periodo a visualizar:",
+                "📅 Seleccione el periodo a visualizar en el mapa:",
                 options=fechas_disponibles,
                 value=fechas_disponibles[-1]
             )
         
         df_mes = df_geo[df_geo['date_str'] == fecha_seleccionada].copy()
-        
         df_mes['lat'] = df_mes['ciudad'].map(lambda x: COORDENADAS_CAPITALES.get(x, {}).get('lat', None))
         df_mes['lon'] = df_mes['ciudad'].map(lambda x: COORDENADAS_CAPITALES.get(x, {}).get('lon', None))
         
@@ -302,55 +301,72 @@ elif pagina == "Comparación territorial":
             val_pasto_txt = f"{var_pasto[0]:.2f}%" if len(var_pasto) > 0 else "N/D"
             st.metric(f"Inflación Pasto ({fecha_seleccionada})", val_pasto_txt)
 
+        # Mapa Geográfico Optimizado (Encuadre perfecto de Colombia)
         fig_mapa = px.scatter_geo(
             df_mapa,
             lat='lat',
             lon='lon',
             color='var_mensual',
-            size=abs(df_mapa['var_mensual']) + 0.5,
+            size=abs(df_mapa['var_mensual']) + 1.2,
             hover_name='ciudad',
             hover_data={'var_mensual': ':.2f%', 'lat': False, 'lon': False},
             text='ciudad',
             color_continuous_scale="Reds",
-            title=f"Mapa de Inflación Mensual IPC — Colombia ({fecha_seleccionada})",
+            title=f"Distribución Espacial de la Inflación Mensual — Colombia ({fecha_seleccionada})",
             labels={'var_mensual': 'Var. Mensual (%)'}
         )
         
         fig_mapa.update_geos(
+            visible=True,
+            resolution=50,
             scope="south america",
-            center=dict(lat=4.5, lon=-73.0),
-            projection_scale=4.2,
-            showcountries=True,
-            countrycolor="#475569",
-            showcoastlines=True,
-            coastlinecolor="#475569",
-            showland=True,
-            landcolor="#1E293B",
-            showocean=True,
-            oceancolor="#0B1120",
-            showlakes=True,
-            lakecolor="#0B1120"
+            showcountries=True, countrycolor="#334155",
+            showcoastlines=True, coastlinecolor="#334155",
+            showland=True, landcolor="#1E293B",
+            showocean=True, oceancolor="#0B1120",
+            showlakes=True, lakecolor="#0B1120",
+            center=dict(lat=4.5, lon=-73.25),
+            lonaxis_range=[-80.0, -66.0],
+            lataxis_range=[-4.5, 13.5]
         )
         
         fig_mapa.update_traces(
-            textposition='top center',
-            marker=dict(line=dict(width=1, color='#F8FAFC'))
+            textposition='top right',
+            textfont=dict(size=10, color="#F8FAFC"),
+            marker=dict(line=dict(width=1.5, color='#F8FAFC'), opacity=0.9)
         )
         
         fig_mapa.update_layout(
             template="plotly_dark",
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            height=600,
+            height=650,
+            margin=dict(t=60, b=20, l=20, r=20),
             font=dict(color="#CBD5E1")
         )
         
         st.plotly_chart(fig_mapa, use_container_width=True)
-        st.caption("📍 El mapa permite deslizar la barra de fechas para explorar la evolución espacial de la inflación en Colombia mes a mes.")
-    
+        
+        st.markdown("---")
+        st.subheader("Ranking de Inflación por Ciudades en el Periodo Seleccionado")
+        st.markdown("Comparativa directa ordenada de mayor a menor variación mensual.")
+        
+        df_ranking = df_mapa.sort_values(by='var_mensual', ascending=True)
+        fig_bar = px.bar(
+            df_ranking,
+            x='var_mensual',
+            y='ciudad',
+            orientation='h',
+            text_auto='.2f',
+            color='var_mensual',
+            color_continuous_scale="Reds",
+            labels={'var_mensual': 'Variación Mensual (%)', 'ciudad': 'Ciudad'}
+        )
+        fig_bar.update_layout(**PLOTLY_LAYOUT, height=500)
+        st.plotly_chart(fig_bar, use_container_width=True)
+        
     else:
-        st.warning("⚠️ No se encontró la base de datos `data/ipc_ciudades_colombia.csv`.")
-
+        st.warning("⚠️ No se encontró la base de datos `data/ipc_ciudades_colombia.csv` en la carpeta data.")
 elif pagina == "Proyecciones exploratorias":
     st.title("Proyecciones Exploratorias")
     st.info("""
