@@ -20,7 +20,7 @@ st.set_page_config(
 )
 
 # --------------------------
-# DISEÑO UI/UX - DARK MODE PROFESIONAL CORREGIDO
+# DISEÑO UI/UX - DARK MODE PROFESIONAL
 # --------------------------
 st.markdown("""
 <style>
@@ -151,29 +151,70 @@ if pagina == "Inicio":
     fig.update_layout(**PLOTLY_LAYOUT, height=450)
     st.plotly_chart(fig, use_container_width=True)
 
+    with st.expander("📖 Interpretación Académica de la Serie Global"):
+        st.write("""
+        La serie histórica de la variación mensual del IPC en San Juan de Pasto evidencia un régimen de baja inflación y estabilidad relativa entre 2017 y 2019, seguido por un periodo de alta perturbación a partir de 2021-2022. 
+        Este comportamiento responde a choques combinados de oferta global (crisis de contenedores postpandemia) y choques de oferta locales (restricciones logísticas y bloqueos viales en el sur del país), evidenciando la fragilidad estructural de las cadenas de abastecimiento regionales.
+        """)
+
 elif pagina == "Evolución de la inflación":
     st.title("Evolución de la inflación en San Juan de Pasto")
-    st.markdown("La variación mensual del IPC mide el cambio porcentual promedio de los precios de la canasta de consumo.")
+    st.markdown("Análisis desagregado de la variación mensual y la acumulación anual por *compounding*.")
+    
     fig1 = px.line(pasto, x="date", y="var_mensual", title="Variación mensual del IPC (2017-2025)", labels={"var_mensual": "Variación mensual (%)", "date": "Fecha"})
     fig1.add_hline(y=0, line_dash="dash", line_color="#F87171")
     fig1.update_traces(line_color="#38BDF8", line_width=2)
     fig1.update_layout(**PLOTLY_LAYOUT, height=400)
     st.plotly_chart(fig1, use_container_width=True)
 
+    with st.expander("🔬 Lectura Teórica: Dinámica Mensual y Estacionalidad"):
+        st.write("""
+        * **Puntos de inflexión:** Los picos más altos de la serie mensual suelen coincidir con principios de año (ajustes de tarifas reguladas, salarios y matrículas) y con coyunturas de escasez de alimentos en plazas de mercado locales.
+        * **Rigidez a la baja:** Se observa que los precios presentan resistencia a disminuir en los periodos de desaceleración económica, lo que consolida una pérdida permanente del poder de compra si los ingresos nominales no se ajustan de manera sincrónica.
+        """)
+
+    st.markdown("---")
+    st.markdown("### Inflación anual aproximada (Compounding)")
+    st.caption("Calculada mediante composición de las variaciones mensuales oficiales del DANE (años con cobertura ≥11 meses).")
+
+    datos_anuales_validos = anual[anual["n_meses"] >= 11]
+    fig2 = px.bar(
+        datos_anuales_validos,
+        x="year", y="inflacion_comp",
+        title="Impacto inflacionario anualizado",
+        text_auto=".2f",
+        labels={"year": "Año", "inflacion_comp": "Inflación Compuesta (%)"}
+    )
+    fig2.update_traces(marker_color="#60A5FA", textposition="outside", textfont=dict(color="#F8FAFC"))
+    fig2.update_layout(**PLOTLY_LAYOUT, height=400)
+    fig2.update_xaxes(dtick=1) 
+    st.plotly_chart(fig2, use_container_width=True)
+
+    with st.expander("🔬 Lectura Teórica: Acumulación Anual y Pérdida de Poder de Compra"):
+        st.write("""
+        La agregación anual por *compounding* refleja la verdadera magnitud del choque inflacionario sobre el presupuesto de los hogares de Pasto en el periodo postpandemia. 
+        Tasas de inflación compuesta superiores al 8% o 10ual anual significan que el poder adquisitivo del dinero se reduce a un ritmo acelerado, castigando severamente a los hogares perceptores de ingresos fijos o salarios mínimos que no logran indexar sus ingresos al mismo ritmo.
+        """)
+
 elif pagina == "Poder adquisitivo (proxy)":
     st.title("Poder adquisitivo del salario mínimo (Proxy)")
     
     st.warning("""
-    **Nota metodológica importante:**  
-    Este indicador utiliza el Salario Mínimo Mensual Legal Vigente (SMMLV) deflactado por el IPC de Pasto.  
-    Constituye un **proxy agregado** y no representa el ingreso real de los hogares. Para un análisis riguroso a nivel de hogar se requieren microdatos de la GEIH. Existe una relación mecánica porque el mismo IPC se emplea como deflactor.
+    **Nota metodológica de rigor:**  
+    Este indicador utiliza el Salario Mínimo Mensual Legal Vigente (SMMLV) deflactado por el IPC de Pasto (base diciembre 2018). Constituye un **proxy agregado** y no representa la distribución real de micro-ingresos de los hogares, existiendo una covarianza mecánica por el uso del IPC como deflactor.
     """, icon="⚠️")
 
     st.markdown("<br>", unsafe_allow_html=True)
-    fig = px.line(pasto, x="date", y="poder_adquisitivo", title="Evolución del Poder Adquisitivo del SMMLV (Pesos base dic 2018)")
+    fig = px.line(pasto, x="date", y="poder_adquisitivo", title="Evolución del Poder Adquisitivo del SMMLV (Pesos constantes - base dic 2018)")
     fig.update_traces(line_color="#34D399", line_width=2.5, fill='tozeroy', fillcolor="rgba(52, 211, 153, 0.1)")
     fig.update_layout(**PLOTLY_LAYOUT, height=450)
     st.plotly_chart(fig, use_container_width=True)
+
+    with st.expander("🔬 Análisis Económico del Ingreso Real y el Salario Mínimo"):
+        st.write("""
+        * **Efecto Decreto vs. Inflación Local:** Cada mes de enero, el Gobierno nacional decreta un incremento nominal del SMMLV; sin embargo, debido a la inflación acumulada a lo largo del año en Pasto, el poder adquisitivo real (línea verde) experimenta una erosión continua y progresiva hasta el siguiente ajuste.
+        * **Implicación distributiva:** Esto demuestra que los incrementos nominales del salario mínimo pierden efectividad real rápidamente cuando las presiones inflacionarias locales superan las expectativas macroeconómicas nacionales.
+        """)
 
 elif pagina == "Comparación territorial estratégica":
     st.title("Heterogeneidad Regional y Asimetrías en el Costo de Vida")
@@ -196,22 +237,11 @@ elif pagina == "Comparación territorial estratégica":
         fig_comp.update_layout(**PLOTLY_LAYOUT, height=500)
         st.plotly_chart(fig_comp, use_container_width=True)
         
-        st.markdown("---")
-        st.subheader("Análisis Académico e Interpretación Económica Regional")
-        st.markdown("""
-        ### Asimetrías Espaciales y Canastas de Consumo Diferenciadas
-        
-        La evidencia gráfica permite validar que **la inflación no opera como un fenómeno espacialmente homogéneo**. Las economías regionales de Colombia enfrentan choques de oferta y estructuras de costos fragmentados:
-        
-        1. **Vulnerabilidad en Regiones Periféricas (Pasto y Quibdó):**  
-           San Juan de Pasto y Quibdó experimentan alta volatilidad en los precios de alimentos y bienes regulados debido a su dependencia de cadenas de suministro externas y vulnerabilidad logística (como los cierres en la vía Panamericana).
-           
-        2. **Efecto Escala en Centros Urbanos (Bogotá y Medellín):**  
-           Bogotá y Medellín exhiben trayectorias con menor amplitud extrema, amortiguadas por mercados laborales profundos y redes logísticas diversificadas.
-           
-        3. **Implicaciones sobre el Poder Adquisitivo:**  
-           Los hogares de menores ingresos en ciudades intermedias destinan una proporción mayor de su presupuesto a bienes esenciales, por lo que un choque inflacionario representa una **pérdida real de bienestar desproporcionadamente mayor**, confirmando que la inflación actúa como un impuesto regresivo territorial.
-        """)
+        with st.expander("🔬 Interpretación Económica de la Asimetría Regional"):
+            st.write("""
+            * **Fricciones Logísticas y Geográficas:** San Juan de Pasto y Quibdó exhiben mayor sensibilidad ante choques de oferta que las grandes metrópolis (Bogotá y Medellín). La dependencia de corredores viales únicos incrementa los costos de transporte y margina a los consumidores locales.
+            * **Inflación como Impuesto Regresivo:** Al tener una canasta donde el gasto en alimentos posee mayor ponderación relativa, los hogares de Pasto resienten con mayor intensidad los episodios inflacionarios frente a ciudades con estructuras de consumo más diversificadas.
+            """)
     else:
         st.warning("⚠️ No se encontró la base de datos `data/ipc_ciudades_colombia.csv`.")
 
@@ -227,9 +257,6 @@ elif pagina == "Conceptos metodológicos":
 
     with st.expander("📌 Limitación mecánica del Proxy"):
         st.write("Al construir el indicador dividiendo el SMMLV entre el IPC regional, se introduce una covarianza puramente matemática. Esto restringe la interpretación causal directa a partir de este indicador agregado.")
-
-    with st.expander("📌 Alcance y limitaciones causales"):
-        st.write("La información presentada evidencia asociación estadística y evolución conjunta. La identificación de impactos causales heterogéneos sobre los hogares requerirá en fases avanzadas el uso de microdatos de la Gran Encuesta Integrada de Hogares (GEIH).")
 
 elif pagina == "Fuentes y limitaciones":
     st.title("Fuentes Documentales y Limitaciones")
