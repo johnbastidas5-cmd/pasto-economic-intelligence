@@ -20,7 +20,7 @@ st.set_page_config(
 )
 
 # --------------------------
-# DISEÑO UI/UX - DARK MODE PROFESIONAL CORREGIDO
+# DISEÑO UI/UX - DARK MODE PROFESIONAL
 # --------------------------
 st.markdown("""
 <style>
@@ -44,23 +44,13 @@ st.markdown("""
         border-radius: 0.75rem;
         border: 1px solid #334155;
     }
-    div[data-testid="metric-label"] p, div[data-testid="stMetricLabel"] p {
+    div[data-testid="stMetricLabel"] p {
         color: #94A3B8 !important;
         font-weight: 500;
     }
     div[data-testid="stMetricValue"] div {
         color: #F8FAFC !important;
         font-weight: 700;
-    }
-    
-    /* CORRECCIÓN FORZADA DE ALERTAS Y WARNINGS (Texto blanco brillante y legible) */
-    div.stAlert, div[data-baseweb="notification"] {
-        background-color: #1E293B !important;
-        border: 1px solid #38BDF8 !important;
-        border-radius: 0.5rem;
-    }
-    div.stAlert *, div[data-baseweb="notification"] * {
-        color: #F8FAFC !important;
     }
 
     h1, h2, h3, h4 { color: #F8FAFC !important; }
@@ -201,12 +191,14 @@ elif pagina == "Evolución de la inflación":
 elif pagina == "Poder adquisitivo (proxy)":
     st.title("Poder adquisitivo del salario mínimo (Proxy)")
     
-    st.warning("""
-    **Nota metodológica importante:**  
-    Este indicador utiliza el Salario Mínimo Mensual Legal Vigente (SMMLV) deflactado por el IPC de Pasto (base diciembre 2018). Constituye un **proxy agregado** y no representa la distribución real de micro-ingresos de los hogares, existiendo una covarianza mecánica por el uso del IPC como deflactor.
-    """, icon="⚠️")
+    # Tarjeta de advertencia personalizada con fondo oscuro y letra blanca brillante
+    st.markdown("""
+    <div style="background-color: #1E293B; border-left: 4px solid #38BDF8; padding: 16px; border-radius: 6px; margin-bottom: 20px;">
+        <span style="font-weight: 700; color: #38BDF8; font-size: 1.05rem;">⚠️ Nota metodológica importante:</span><br>
+        <span style="color: #F8FAFC; font-size: 0.95rem; line-height: 1.5;">Este indicador utiliza el Salario Mínimo Mensual Legal Vigente (SMMLV) deflactado por el IPC de Pasto (base diciembre 2018). Constituye un <b>proxy agregado</b> y no representa la distribución real de micro-ingresos de los hogares, existiendo una covarianza mecánica por el uso del IPC como deflactor.</span>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
     fig = px.line(pasto, x="date", y="poder_adquisitivo", title="Evolución del Poder Adquisitivo del SMMLV (Pesos constantes - base dic 2018)")
     fig.update_traces(line_color="#34D399", line_width=2.5, fill='tozeroy', fillcolor="rgba(52, 211, 153, 0.1)")
     fig.update_layout(**PLOTLY_LAYOUT, height=450)
