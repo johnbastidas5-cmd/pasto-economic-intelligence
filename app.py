@@ -52,7 +52,6 @@ st.markdown("""
         color: #F8FAFC !important;
         font-weight: 700;
     }
-    /* CORRECCIÓN DE ALERTS PARA ALTO CONTRASTE EN MODO OSCURO */
     div.stAlert {
         background-color: #1E293B !important;
         border: 1px solid #38BDF8 !important;
@@ -118,7 +117,6 @@ with st.sidebar:
             "Evolución de la inflación",
             "Poder adquisitivo (proxy)",
             "Comparación territorial estratégica",
-            "Proyecciones exploratorias",
             "Conceptos metodológicos",
             "Fuentes y limitaciones"
         ],
@@ -165,7 +163,6 @@ elif pagina == "Evolución de la inflación":
 elif pagina == "Poder adquisitivo (proxy)":
     st.title("Poder adquisitivo del salario mínimo (Proxy)")
     
-    # Alerta con legibilidad corregida
     st.warning("""
     **Nota metodológica importante:**  
     Este indicador utiliza el Salario Mínimo Mensual Legal Vigente (SMMLV) deflactado por el IPC de Pasto.  
@@ -218,7 +215,6 @@ elif pagina == "Comparación territorial estratégica":
     else:
         st.warning("⚠️ No se encontró la base de datos `data/ipc_ciudades_colombia.csv`.")
 
-
 elif pagina == "Conceptos metodológicos":
     st.title("Conceptos y Notas Metodológicas")
     st.markdown("Precisiones teóricas y operativas para la correcta lectura de la investigación.")
@@ -252,7 +248,6 @@ elif pagina == "Fuentes y limitaciones":
         st.markdown("""
         * El análisis empírico actual utiliza series agregadas; **no incorpora microdatos** de ingresos a nivel de hogar (GEIH).
         * El alcance es de carácter descriptivo-correlacional, **no establece efectos causales** paramétricos directos.
-        * Las proyecciones presentadas son ejercicios inerciales exploratorios y no constituyen pronósticos oficiales.
         """)
 
 st.markdown("---")
