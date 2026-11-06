@@ -20,7 +20,7 @@ st.set_page_config(
 )
 
 # --------------------------
-# DISEÑO UI/UX - DARK MODE PROFESIONAL
+# DISEÑO UI/UX - DARK MODE PROFESIONAL CORREGIDO
 # --------------------------
 st.markdown("""
 <style>
@@ -52,15 +52,17 @@ st.markdown("""
         color: #F8FAFC !important;
         font-weight: 700;
     }
+    
+    /* CORRECCIÓN DEFINITIVA DE ALERTAS (Fondo oscuro elegante y texto blanco legible) */
     div.stAlert {
         background-color: #1E293B !important;
         border: 1px solid #38BDF8 !important;
         border-radius: 0.5rem;
+    }
+    div.stAlert p, div.stAlert div, div.stAlert span, div.stAlert label {
         color: #F8FAFC !important;
     }
-    div.stAlert p, div.stAlert div, div.stAlert label, div.stAlert span {
-        color: #F8FAFC !important;
-    }
+
     h1, h2, h3, h4 { color: #F8FAFC !important; }
     p, li, span { color: #CBD5E1 !important; }
     hr { border-color: #1E293B !important; }
@@ -193,14 +195,14 @@ elif pagina == "Evolución de la inflación":
     with st.expander("🔬 Lectura Teórica: Acumulación Anual y Pérdida de Poder de Compra"):
         st.write("""
         La agregación anual por *compounding* refleja la verdadera magnitud del choque inflacionario sobre el presupuesto de los hogares de Pasto en el periodo postpandemia. 
-        Tasas de inflación compuesta superiores al 8% o 10ual anual significan que el poder adquisitivo del dinero se reduce a un ritmo acelerado, castigando severamente a los hogares perceptores de ingresos fijos o salarios mínimos que no logran indexar sus ingresos al mismo ritmo.
+        Tasas de inflación compuesta superiores al 8% o 10% anual significan que el poder adquisitivo del dinero se reduce a un ritmo acelerado, castigando severamente a los hogares perceptores de ingresos fijos o salarios mínimos que no logran indexar sus ingresos al mismo ritmo.
         """)
 
 elif pagina == "Poder adquisitivo (proxy)":
     st.title("Poder adquisitivo del salario mínimo (Proxy)")
     
     st.warning("""
-    **Nota metodológica de rigor:**  
+    **Nota metodológica importante:**  
     Este indicador utiliza el Salario Mínimo Mensual Legal Vigente (SMMLV) deflactado por el IPC de Pasto (base diciembre 2018). Constituye un **proxy agregado** y no representa la distribución real de micro-ingresos de los hogares, existiendo una covarianza mecánica por el uso del IPC como deflactor.
     """, icon="⚠️")
 
